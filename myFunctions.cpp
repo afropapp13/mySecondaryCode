@@ -86,4 +86,21 @@ double Chi2(TH1D* h1,TH1D* h2) {
 
 // -------------------------------------------------------------------------------------------------------------------------------------
 
+TString ToStringInt(int num) {
+
+	std::ostringstream start;
+	start << num;
+	string start1 = start.str();
+	return start1;
+
+}
+
+TString ToString(double num) {
+
+	std::ostringstream start;
+	start << num;
+	string start1 = start.str();
+	return start1;
+
+}
 
