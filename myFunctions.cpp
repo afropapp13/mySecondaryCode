@@ -39,7 +39,7 @@ double IntegratedXSec(TH1D* h) {
 // -------------------------------------------------------------------------------------------------------------------------------------
 
 double IntegratedXSecError(TH1D* h) {
-
+/*
 	int NBinsX = h->GetXaxis()->GetNbins();
 
 	double IntegratedXSecErrorSquared = 0;
@@ -54,6 +54,22 @@ double IntegratedXSecError(TH1D* h) {
 	}
 
 	double IntegratedXSecError = TMath::Sqrt(IntegratedXSecErrorSquared);
+
+	return IntegratedXSecError;
+*/
+
+	int NBinsX = h->GetXaxis()->GetNbins();
+
+	double IntegratedXSecError = 0;
+
+	for (int WhichXBin = 0; WhichXBin < NBinsX; WhichXBin++) {
+
+		double BinWidth = h->GetBinWidth(WhichXBin+1);
+		double GenieBinError = h->GetBinError(WhichXBin+1);
+
+		IntegratedXSecError += GenieBinError * BinWidth;
+
+	}
 
 	return IntegratedXSecError;
 
