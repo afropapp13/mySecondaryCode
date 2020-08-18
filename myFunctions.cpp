@@ -1,4 +1,5 @@
 #include "TMath.h"
+#include <TH1D.h>
 
 #include <iostream>
 #include <iomanip>
@@ -77,13 +78,16 @@ double IntegratedXSecError(TH1D* h) {
 
 // -------------------------------------------------------------------------------------------------------------------------------------
 
-double Chi2(TH1D* h1,TH1D* h2) {
+double Chi2(TH1D* h1,TH1D* h2, int LowBin = -1, int HighBin = -1) {
 
 	int NBinsX = h1->GetXaxis()->GetNbins();
 
 	double chi2 = 0;
+	
+	if (LowBin == -1) { LowBin = 0; }
+	if (HighBin == -1) { HighBin = NBinsX; }	
 
-	for (int WhichXBin = 0; WhichXBin < NBinsX; WhichXBin++) {
+	for (int WhichXBin = LowBin; WhichXBin < HighBin; WhichXBin++) {
 
 		double h1Entry = h1->GetBinContent(WhichXBin+1);
 		double h1Error = h1->GetBinError(WhichXBin+1);
@@ -92,7 +96,7 @@ double Chi2(TH1D* h1,TH1D* h2) {
 
 		double num = TMath::Power(h1Entry - h2Entry,2.);
 		double den = TMath::Power(h1Error,2.) + TMath::Power(h2Error,2.);
-		chi2 += (num / den); 
+		if (den != 0) { chi2 += (num / den); }
 
 	}
 
@@ -110,6 +114,8 @@ TString ToStringInt(int num) {
 	return start1;
 
 }
+
+// -------------------------------------------------------------------------------------------------------------------------------------
 
 TString ToString(double num) {
 
