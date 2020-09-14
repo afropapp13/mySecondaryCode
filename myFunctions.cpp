@@ -126,3 +126,28 @@ TString ToString(double num) {
 
 }
 
+// -------------------------------------------------------------------------------------------------------------------------------------
+
+double computeMean(std::vector<double> numbers) {
+
+	if(numbers.empty()) return 0;
+
+	double total = 0;
+	for (int number = 0; number < (int)(numbers.size()); number ++) {
+		total += numbers[number];
+	}
+
+	double average = total / numbers.size();
+	return average;
+}
+
+double computeStd(double mean, std::vector<double> numbers) {
+
+	float result = 0;
+	for (int number = 0; number < (int)(numbers.size()); number ++) {
+		result += (numbers[number] - mean)*(numbers[number] - mean);
+	}
+
+	return sqrt(result / (numbers.size() - 1));
+}
+
