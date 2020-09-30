@@ -1,5 +1,6 @@
 #include "TMath.h"
 #include <TH1D.h>
+#include <TH2D.h>
 
 #include <iostream>
 #include <iomanip>
@@ -26,7 +27,8 @@ void Reweight2D(TH2D* h, double SF) {
 			double NewError = CurrentError * SF / ( h->GetXaxis()->GetBinWidth(i+1) * h->GetYaxis()->GetBinWidth(j+1) );
 
 			h->SetBinContent(i+1,j+1,NewEntry); 
-			h->SetBinError(i+1,j+1,NewError); 
+//			h->SetBinError(i+1,j+1,NewError); 
+			h->SetBinError(i+1,j+1,0.); 
 
 		}
 
@@ -49,7 +51,8 @@ void Reweight(TH1D* h, double SF) {
 		double NewError = CurrentError * SF / h->GetBinWidth(i+1);
 
 		h->SetBinContent(i+1,NewEntry); 
-		h->SetBinError(i+1,NewError); 
+//		h->SetBinError(i+1,NewError); 
+		h->SetBinError(i+1,0.); 
 
 	}
 
@@ -87,7 +90,7 @@ double IntegratedXSec(TH1D* h) {
 // -------------------------------------------------------------------------------------------------------------------------------------
 
 double IntegratedXSecError(TH1D* h) {
-/*
+
 	int NBinsX = h->GetXaxis()->GetNbins();
 
 	double IntegratedXSecErrorSquared = 0;
@@ -95,17 +98,17 @@ double IntegratedXSecError(TH1D* h) {
 	for (int WhichXBin = 0; WhichXBin < NBinsX; WhichXBin++) {
 
 		double BinWidth = h->GetBinWidth(WhichXBin+1);
-		double GenieBinError = h->GetBinError(WhichXBin+1);
+		double BinError = h->GetBinError(WhichXBin+1);
 
-		IntegratedXSecErrorSquared += TMath::Power(GenieBinError,2.) * BinWidth;
+		IntegratedXSecErrorSquared += TMath::Power(BinError,2.) * BinWidth;
 
 	}
 
 	double IntegratedXSecError = TMath::Sqrt(IntegratedXSecErrorSquared);
 
 	return IntegratedXSecError;
-*/
 
+/*
 	int NBinsX = h->GetXaxis()->GetNbins();
 
 	double IntegratedXSecError = 0;
@@ -113,14 +116,14 @@ double IntegratedXSecError(TH1D* h) {
 	for (int WhichXBin = 0; WhichXBin < NBinsX; WhichXBin++) {
 
 		double BinWidth = h->GetBinWidth(WhichXBin+1);
-		double GenieBinError = h->GetBinError(WhichXBin+1);
+		double BinError = h->GetBinError(WhichXBin+1);
 
-		IntegratedXSecError += GenieBinError * BinWidth;
+		IntegratedXSecError += BinError * BinWidth;
 
 	}
 
 	return IntegratedXSecError;
-
+*/
 }
 
 // -------------------------------------------------------------------------------------------------------------------------------------
