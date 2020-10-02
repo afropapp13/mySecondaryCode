@@ -28,7 +28,7 @@ void Reweight2D(TH2D* h, double SF) {
 
 			h->SetBinContent(i+1,j+1,NewEntry); 
 //			h->SetBinError(i+1,j+1,NewError); 
-			h->SetBinError(i+1,j+1,0.); 
+			h->SetBinError(i+1,j+1,0.000001); 
 
 		}
 
@@ -52,7 +52,7 @@ void Reweight(TH1D* h, double SF) {
 
 		h->SetBinContent(i+1,NewEntry); 
 //		h->SetBinError(i+1,NewError); 
-		h->SetBinError(i+1,0.); 
+		h->SetBinError(i+1,0.000001); 
 
 	}
 
