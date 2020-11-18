@@ -1,6 +1,7 @@
 #include "TMath.h"
 #include <TH1D.h>
 #include <TH2D.h>
+#include <TMatrix.h>
 
 #include <iostream>
 #include <iomanip>
@@ -191,6 +192,8 @@ double computeMean(std::vector<double> numbers) {
 	return average;
 }
 
+// -------------------------------------------------------------------------------------------------------------------------------------
+
 double computeStd(double mean, std::vector<double> numbers) {
 
 	float result = 0;
@@ -200,4 +203,46 @@ double computeStd(double mean, std::vector<double> numbers) {
 
 	return sqrt(result / (numbers.size() - 1));
 }
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
+TH1D* ForwardFold(TH1D* True, TH1D* Reco, TH2D* MigrationMatrix) {
+
+	TH1D* ForwardFoldEfficiency = (TH1D*)(Reco->Clone("ForwardFoldEfficiency"));
+
+	int XBins = True->GetXaxis()->GetNbins();
+	int YBins = True->GetYaxis()->GetNbins();
+
+	if (XBins != YBins) { std::cout << "Not symmetric matrix" << std::endl; }
+
+
+	for (int WhichXBin = 0; WhichXBin < XBins; WhichXBin++) {
+
+		double Num = 0;
+		double Den = 0;
+
+		for (int WhichYBin = 0; WhichYBin < YBins; WhichYBin++) {
+
+			double RecoInBin = Reco->GetBinContent(WhichYBin + 1); 
+			double TrueInBin = True->GetBinContent(WhichYBin + 1);
+			double MigrationInBin = MigrationMatrix->GetBinContent(YBins - WhichYBin,WhichXBin + 1);
+
+			Num +=  MigrationInBin * RecoInBin;
+			Den +=  MigrationInBin * TrueInBin;
+
+	
+		}
+
+		double FFefficiency = 0.;
+		if (Den > 0) { FFefficiency = Num / Den; }
+		ForwardFoldEfficiency->SetBinContent(WhichXBin+1,FFefficiency);
+
+	}
+
+	return 	ForwardFoldEfficiency;
+
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
 
