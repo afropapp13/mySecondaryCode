@@ -61,10 +61,10 @@ void Reweight(TH1D* h, double SF) {
 
 // -------------------------------------------------------------------------------------------------------------------------------------
 
-float round(float var,int acc = 0) 
+double round(double var,int acc = 0) 
 { 
-    float value = (int)(var * TMath::Power(10.,acc) + .5); 
-    return (float)value / TMath::Power(10.,acc); 
+    double value = (int)(var * TMath::Power(10.,acc) + .5); 
+    return (double)value / TMath::Power(10.,acc); 
 } 
 
 // -------------------------------------------------------------------------------------------------------------------------------------
