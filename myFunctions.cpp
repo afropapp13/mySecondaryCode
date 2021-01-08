@@ -78,9 +78,9 @@ double IntegratedXSec(TH1D* h) {
 	for (int WhichXBin = 0; WhichXBin < NBinsX; WhichXBin++) {
 
 		double BinWidth = h->GetBinWidth(WhichXBin+1);
-		double GenieBinEntry = h->GetBinContent(WhichXBin+1);
+		double BinEntry = h->GetBinContent(WhichXBin+1);
 
-		IntegratedXSec += GenieBinEntry * BinWidth;
+		IntegratedXSec += BinEntry * BinWidth;
 
 	}
 
@@ -208,6 +208,10 @@ double computeStd(double mean, std::vector<double> numbers) {
 
 TH1D* ForwardFold(TH1D* True, TH1D* Reco, TH2D* MigrationMatrix) {
 
+	// References (Marco & Lu)
+	//https://microboone-docdb.fnal.gov/cgi-bin/private/RetrieveFile?docid=30139&filename=NCE_MCC9_Internal_Note__v1_1%20_temp.pdf&version=1
+	//https://microboone-docdb.fnal.gov/cgi-bin/private/RetrieveFile?docid=14937&filename=numu_cc_inclusive_internal_note_v3.1.pdf&version=8
+
 	TH1D* ForwardFoldEfficiency = (TH1D*)(Reco->Clone("ForwardFoldEfficiency"));
 
 	int XBins = True->GetXaxis()->GetNbins();
@@ -218,8 +222,11 @@ TH1D* ForwardFold(TH1D* True, TH1D* Reco, TH2D* MigrationMatrix) {
 
 	for (int WhichXBin = 0; WhichXBin < XBins; WhichXBin++) {
 
-		double Num = 0;
-		double Den = 0;
+		double Num = 0.;
+		double Den = 0.;
+
+		double NumErrSquared = 0.;
+		double DenErrSquared = 0.;
 
 		for (int WhichYBin = 0; WhichYBin < YBins; WhichYBin++) {
 
@@ -227,15 +234,32 @@ TH1D* ForwardFold(TH1D* True, TH1D* Reco, TH2D* MigrationMatrix) {
 			double TrueInBin = True->GetBinContent(WhichYBin + 1);
 			double MigrationInBin = MigrationMatrix->GetBinContent(YBins - WhichYBin,WhichXBin + 1);
 
+			double ErrorRecoInBin = Reco->GetBinError(WhichYBin + 1); 
+			double ErrorTrueInBin = True->GetBinError(WhichYBin + 1);
+			double ErrorMigrationInBin = MigrationMatrix->GetBinError(YBins - WhichYBin,WhichXBin + 1);
+
 			Num +=  MigrationInBin * RecoInBin;
 			Den +=  MigrationInBin * TrueInBin;
+
+			NumErrSquared += TMath::Power(ErrorMigrationInBin * RecoInBin,2.) + TMath::Power(MigrationInBin * ErrorRecoInBin,2.);
+			DenErrSquared += TMath::Power(ErrorMigrationInBin * TrueInBin,2.) + TMath::Power(MigrationInBin * ErrorTrueInBin,2.);
 
 	
 		}
 
+		double NumErr = TMath::Sqrt(NumErrSquared);
+		double DenErr = TMath::Sqrt(NumErrSquared);
+
+		// FFEfficiency
+
 		double FFefficiency = 0.;
 		if (Den > 0) { FFefficiency = Num / Den; }
 		ForwardFoldEfficiency->SetBinContent(WhichXBin+1,FFefficiency);
+
+		// FFEfficiency Error
+		double ErrorFFefficiency = 0.;
+		if (Den > 0) { ErrorFFefficiency = FFefficiency * TMath::Sqrt( TMath::Power(NumErr/Num,2.) + TMath::Power(DenErr/Den,2.) ); }
+		ForwardFoldEfficiency->SetBinError(WhichXBin+1,ErrorFFefficiency);
 
 	}
 
