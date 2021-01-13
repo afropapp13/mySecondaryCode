@@ -206,19 +206,55 @@ double computeStd(double mean, std::vector<double> numbers) {
 
 // --------------------------------------------------------------------------------------------------------------------------------------------
 
+TH1D* SmearTrueToReco(TH1D* True, TFile* MigrationMatrixFile, TString PlotName, TString identifier) {
+
+	TH2D* MigrationMatrix = (TH2D*)MigrationMatrixFile->Get("CC1pReco"+PlotName+"2D");
+
+	TH1D* Reco = (TH1D*)(True->Clone("Reco"+PlotName+identifier));
+
+	int XBins = MigrationMatrix->GetXaxis()->GetNbins();
+	int YBins = MigrationMatrix->GetYaxis()->GetNbins();
+
+	if (XBins != YBins) { std::cout << "Not symmetric matrix" << std::endl; }
+
+	for (int WhichXBin = 0; WhichXBin < XBins; WhichXBin++) {
+
+		double Entry = 0.;
+
+		for (int WhichYBin = 0; WhichYBin < YBins; WhichYBin++) {
+
+			double TrueInBin = True->GetBinContent(WhichYBin + 1);
+			double MigrationInBin = MigrationMatrix->GetBinContent(WhichYBin + 1,WhichXBin + 1);
+
+			Entry +=  MigrationInBin * TrueInBin;
+	
+		}
+
+		// Bin entry in reco space
+
+		Reco->SetBinContent(WhichXBin+1,Entry);
+
+	}
+
+	return 	Reco;
+
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------------------
+
 TH1D* ForwardFold(TH1D* True, TH1D* Reco, TH2D* MigrationMatrix) {
 
 	// References (Marco & Lu)
 	//https://microboone-docdb.fnal.gov/cgi-bin/private/RetrieveFile?docid=30139&filename=NCE_MCC9_Internal_Note__v1_1%20_temp.pdf&version=1
 	//https://microboone-docdb.fnal.gov/cgi-bin/private/RetrieveFile?docid=14937&filename=numu_cc_inclusive_internal_note_v3.1.pdf&version=8
 
-	TH1D* ForwardFoldEfficiency = (TH1D*)(Reco->Clone("ForwardFoldEfficiency"));
+//	TH1D* ForwardFoldEfficiency = (TH1D*)(Reco->Clone("ForwardFoldEfficiency"));
+	TH1D* ForwardFoldEfficiency = (TH1D*)(Reco->Clone());
 
-	int XBins = True->GetXaxis()->GetNbins();
-	int YBins = True->GetYaxis()->GetNbins();
+	int XBins = MigrationMatrix->GetXaxis()->GetNbins();
+	int YBins = MigrationMatrix->GetYaxis()->GetNbins();
 
 	if (XBins != YBins) { std::cout << "Not symmetric matrix" << std::endl; }
-
 
 	for (int WhichXBin = 0; WhichXBin < XBins; WhichXBin++) {
 
@@ -232,11 +268,11 @@ TH1D* ForwardFold(TH1D* True, TH1D* Reco, TH2D* MigrationMatrix) {
 
 			double RecoInBin = Reco->GetBinContent(WhichYBin + 1); 
 			double TrueInBin = True->GetBinContent(WhichYBin + 1);
-			double MigrationInBin = MigrationMatrix->GetBinContent(YBins - WhichYBin,WhichXBin + 1);
+			double MigrationInBin = MigrationMatrix->GetBinContent(WhichYBin + 1,WhichXBin + 1);
 
 			double ErrorRecoInBin = Reco->GetBinError(WhichYBin + 1); 
 			double ErrorTrueInBin = True->GetBinError(WhichYBin + 1);
-			double ErrorMigrationInBin = MigrationMatrix->GetBinError(YBins - WhichYBin,WhichXBin + 1);
+			double ErrorMigrationInBin = MigrationMatrix->GetBinError(WhichYBin + 1,WhichXBin + 1);
 
 			Num +=  MigrationInBin * RecoInBin;
 			Den +=  MigrationInBin * TrueInBin;
