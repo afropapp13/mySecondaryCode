@@ -8,7 +8,26 @@
 #include <string>
 #include <sstream>
 
+#include "ubana/myClasses/Constants.h"
+
 using namespace std;
+using namespace Constants;
+
+// -------------------------------------------------------------------------------------------------------------------------------------
+
+double ReturnBeamOnRunPOT(TString Run) {
+
+	double DataPOT = -99.;
+
+	if (Run == "Run1") { DataPOT = tor860_wcut_Run1 ; }
+	if (Run == "Run2") { DataPOT = tor860_wcut_Run2 ; }
+	if (Run == "Run3") { DataPOT = tor860_wcut_Run3 ; }
+	if (Run == "Run4") { DataPOT = tor860_wcut_Run4 ; }
+	if (Run == "Run5") { DataPOT = tor860_wcut_Run5 ; }
+
+	return DataPOT;
+
+}
 
 // -------------------------------------------------------------------------------------------------------------------------------------
 
