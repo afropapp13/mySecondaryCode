@@ -187,6 +187,17 @@ TString ToStringInt(int num) {
 
 // -------------------------------------------------------------------------------------------------------------------------------------
 
+TString ToStringFloat(float num) {
+
+	std::ostringstream start;
+	start << num;
+	string start1 = start.str();
+	return start1;
+
+}
+
+// -------------------------------------------------------------------------------------------------------------------------------------
+
 TString ToString(double num) {
 
 	std::ostringstream start;
