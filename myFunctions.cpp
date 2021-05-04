@@ -120,7 +120,7 @@ double IntegratedXSecError(TH1D* h) {
 		double BinWidth = h->GetBinWidth(WhichXBin+1);
 		double BinError = h->GetBinError(WhichXBin+1);
 
-		IntegratedXSecErrorSquared += TMath::Power(BinError,2.) * BinWidth;
+		IntegratedXSecErrorSquared += TMath::Power(BinError* BinWidth,2.);
 
 	}
 
@@ -128,22 +128,6 @@ double IntegratedXSecError(TH1D* h) {
 
 	return IntegratedXSecError;
 
-/*
-	int NBinsX = h->GetXaxis()->GetNbins();
-
-	double IntegratedXSecError = 0;
-
-	for (int WhichXBin = 0; WhichXBin < NBinsX; WhichXBin++) {
-
-		double BinWidth = h->GetBinWidth(WhichXBin+1);
-		double BinError = h->GetBinError(WhichXBin+1);
-
-		IntegratedXSecError += BinError * BinWidth;
-
-	}
-
-	return IntegratedXSecError;
-*/
 }
 
 // -------------------------------------------------------------------------------------------------------------------------------------
