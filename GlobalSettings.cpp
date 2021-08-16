@@ -5,6 +5,8 @@
 
 #include "ubana/myClasses/Constants.h"
 
+// Aug 16 2021: Testing new authentication method
+
 void GlobalSettings() {
 
 	TH1D::SetDefaultSumw2();
