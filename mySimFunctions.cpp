@@ -10,7 +10,15 @@
 
 using namespace std;
 
-// -----------------------------------------------------------------------------------------------
+//----------------------------------------//
+
+double round(double var,int acc = 0) {
+
+    double value = (int)(var * TMath::Power(10.,acc) + .5); 
+    return (double)value / TMath::Power(10.,acc); 
+} 
+
+//----------------------------------------//
 
 void CalcChiSquared(TH1D* h_model, TH1D* h_data, TH2D* cov, double &chi, int &ndof, double &pval) {
 
@@ -19,53 +27,83 @@ void CalcChiSquared(TH1D* h_model, TH1D* h_data, TH2D* cov, double &chi, int &nd
 	TH1D* h_model_clone = (TH1D*)h_model->Clone();
 	TH1D* h_data_clone  = (TH1D*)h_data->Clone();
 	TH2D* h_cov_clone   = (TH2D*)cov->Clone();
+	int NBins = h_cov_clone->GetNbinsX();
+
+	double ScaleFactor = 1.;
 
 	// Getting covariance matrix in TMatrix form
 
-	TMatrix cov_m;
+	TMatrixD cov_m;
 	cov_m.Clear();
-	cov_m.ResizeTo(h_cov_clone->GetNbinsX(), h_cov_clone->GetNbinsX());
+	cov_m.ResizeTo(NBins,NBins);
 
 	// loop over rows
 
-	for (int i = 0; i < h_cov_clone->GetNbinsX(); i++) {
+	for (int i = 0; i < NBins; i++) {
+
+		//double BinWidth = h_data_clone->GetBinWidth(i+1);
+
+		//double MCEntry = h_model_clone->GetBinContent(i+1);
+		//double DataEntry = h_data_clone->GetBinContent(i+1);
+
+		//h_model_clone->SetBinContent(i+1,MCEntry*BinWidth);
+		//h_data_clone->SetBinContent(i+1,DataEntry*BinWidth);				
 
 		// loop over columns
 
-		for (int j = 0; j < h_cov_clone->GetNbinsY(); j++) {
+		for (int j = 0; j < NBins; j++) {
 
-			cov_m[i][j] = h_cov_clone->GetBinContent(i+1, j+1);
-		
+			cov_m[i][j] = h_cov_clone->GetBinContent(i+1, j+1) * ScaleFactor; // Scale by ScaleFactor otherwise infinities
+
+//			cov_m[i][j] = 1.;
+//			if (i != j) { cov_m[i][j] = 0.; }
+ 
 		}
 	
 	}
 
-	// Inverting the covariance matrix
+	TMatrixD copy_cov_m = cov_m;
 
-	cov_m.SetTol(1.e-23);
-	TMatrix inverse_cov_m = cov_m.Invert();
-	inverse_cov_m.SetTol(1.e-23);
+	// Inverting the covariance matrix
+	//cov_m.SetTol(1.e-23);
+	TMatrixD inverse_cov_m = cov_m.Invert();
+	//inverse_cov_m.SetTol(1.e-23);
 
 	// Calculating the chi2 = Summation_ij{ (x_i - mu_j)*E_ij^(-1)*(x_j - mu_j)  }
 	// x = data, mu = model, E^(-1) = inverted covariance matrix 
 
 	chi = 0.;
 	
-	for (int i = 0; i < h_cov_clone->GetNbinsX(); i++) {
+	for (int i = 0; i < NBins; i++) {
 
-		for (int j = 0; j < h_cov_clone->GetNbinsY(); j++) {
+		//double XWidth = h_data_clone->GetBinWidth(i+1);
+
+		for (int j = 0; j < NBins; j++) {
+
+			//double YWidth = h_data_clone->GetBinWidth(i+1);
 
 			double diffi = h_data_clone->GetBinContent(i+1) - h_model_clone->GetBinContent(i+1);
 			double diffj = h_data_clone->GetBinContent(j+1) - h_model_clone->GetBinContent(j+1);
-
-			double LocalChi = diffi * inverse_cov_m[i][j] * diffj; 
+			double LocalChi = diffi * inverse_cov_m[i][j] * diffj * ScaleFactor; 
 			chi += LocalChi;
-//if (i == j) { cout << "i = " << i << " j = " << j << " diffi = " << diffi << " diffj = " << diffj << " chi = " << chi << " LocalChi = " << LocalChi << endl; }
+//if (i == j) { cout << "i = " << i << " j = " << j << " diffi = " << diffi << " diffj = " << diffj << "  inv = " << inverse_cov_m[i][j] << "  reg m = " << copy_cov_m[i][j] << " chi = " << chi << " LocalChi = " << LocalChi << endl; }
+//cout << "i = " << i << " j = " << j << " diffi = " << diffi << " diffj = " << diffj << "  inv = " << inverse_cov_m[i][j] << "  reg m = " << copy_cov_m[i][j] << " chi = " << chi << " LocalChi = " << LocalChi << endl;
+
 		}
 
 	}
 
 //cout << endl;
+
+//TCanvas* Canvas = new TCanvas("canvas","canvas",205,34,1024,768);
+//copy_cov_m.Draw("coltz text");
+
+//TCanvas* InvCanvas = new TCanvas("invcanvas","invcanvas",205,34,1024,768);
+//inverse_cov_m.Draw("coltz text");
+
+//TCanvas* ProdCanvas = new TCanvas("Prodcanvas","Prodcanvas",205,34,1024,768);
+//TMatrixD product = inverse_cov_m * copy_cov_m;
+//product.Draw("coltz text");
 
 	ndof = h_data_clone->GetNbinsX();
 	pval = TMath::Prob(chi, ndof);
@@ -122,7 +160,7 @@ double Chi2Func(TH1D* h1,TH1D* h2, int LowBin = -1, int HighBin = -1) {
 		double h2Error = h2->GetBinError(WhichXBin+1);
 
 		double num = TMath::Power(h1Entry - h2Entry,2.);
-		double den = TMath::Power(h1Error,2.) + TMath::Power(h2Error,2.);
+		double den = TMath::Sqrt( TMath::Power(h1Error,2.) + TMath::Power(h2Error,2.) );
 		if (den != 0) { chi2 += (num / den); }
 
 	}
