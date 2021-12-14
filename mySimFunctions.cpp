@@ -169,7 +169,7 @@ double Chi2Func(TH1D* h1,TH1D* h2, int LowBin = -1, int HighBin = -1) {
 
 }
 
-// -------------------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------//
 
 TString to_string_with_precision(double a_value, const int n = 3)
 {
@@ -178,7 +178,8 @@ TString to_string_with_precision(double a_value, const int n = 3)
     out << std::fixed << a_value;
     return TString(out.str());
 }
-// -------------------------------------------------------------------------------------------------------------------------------------
+
+//----------------------------------------//
 
 double IntegratedXSec(TH1D* h) {
 
@@ -260,9 +261,31 @@ void Reweight2D(TH2D* h, double SF) {
 
 }
 
-// -------------------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------//
 
-void Reweight(TH1D* h, double SF) {
+void UnReweight(TH1D* h, double SF = 1.) {
+
+	int NBins = h->GetXaxis()->GetNbins();
+
+	for (int i = 0; i < NBins; i++) {
+
+		double CurrentEntry = h->GetBinContent(i+1);
+		double NewEntry = CurrentEntry * SF * h->GetBinWidth(i+1);
+
+		double CurrentError = h->GetBinError(i+1);
+		double NewError = CurrentError * SF * h->GetBinWidth(i+1);
+
+		h->SetBinContent(i+1,NewEntry); 
+//		h->SetBinError(i+1,NewError); 
+		h->SetBinError(i+1,0.000001); 
+
+	}
+
+}
+
+//----------------------------------------//
+
+void Reweight(TH1D* h, double SF = 1.) {
 
 	int NBins = h->GetXaxis()->GetNbins();
 
@@ -282,4 +305,4 @@ void Reweight(TH1D* h, double SF) {
 
 }
 
-// -------------------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------//
