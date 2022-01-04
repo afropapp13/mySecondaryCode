@@ -2,6 +2,8 @@
 #include <TH1D.h>
 #include <TH2D.h>
 #include <TMatrix.h>
+#include <TMatrixD.h>
+#include <TVectorD.h>
 
 #include <iostream>
 #include <iomanip>
