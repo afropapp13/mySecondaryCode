@@ -31,8 +31,6 @@ void CalcChiSquared(TH1D* h_model, TH1D* h_data, TH2D* cov, double &chi, int &nd
 	TH2D* h_cov_clone   = (TH2D*)cov->Clone();
 	int NBins = h_cov_clone->GetNbinsX();
 
-	double ScaleFactor = 1.;
-
 	// Getting covariance matrix in TMatrix form
 
 	TMatrixD cov_m;
@@ -41,24 +39,13 @@ void CalcChiSquared(TH1D* h_model, TH1D* h_data, TH2D* cov, double &chi, int &nd
 
 	// loop over rows
 
-	for (int i = 0; i < NBins; i++) {
-
-		//double BinWidth = h_data_clone->GetBinWidth(i+1);
-
-		//double MCEntry = h_model_clone->GetBinContent(i+1);
-		//double DataEntry = h_data_clone->GetBinContent(i+1);
-
-		//h_model_clone->SetBinContent(i+1,MCEntry*BinWidth);
-		//h_data_clone->SetBinContent(i+1,DataEntry*BinWidth);				
+	for (int i = 0; i < NBins; i++) {			
 
 		// loop over columns
 
 		for (int j = 0; j < NBins; j++) {
 
-			cov_m[i][j] = h_cov_clone->GetBinContent(i+1, j+1) * ScaleFactor; // Scale by ScaleFactor otherwise infinities
-
-//			cov_m[i][j] = 1.;
-//			if (i != j) { cov_m[i][j] = 0.; }
+			cov_m[i][j] = h_cov_clone->GetBinContent(i+1, j+1);
  
 		}
 	
@@ -67,9 +54,7 @@ void CalcChiSquared(TH1D* h_model, TH1D* h_data, TH2D* cov, double &chi, int &nd
 	TMatrixD copy_cov_m = cov_m;
 
 	// Inverting the covariance matrix
-	//cov_m.SetTol(1.e-23);
 	TMatrixD inverse_cov_m = cov_m.Invert();
-	//inverse_cov_m.SetTol(1.e-23);
 
 	// Calculating the chi2 = Summation_ij{ (x_i - mu_j)*E_ij^(-1)*(x_j - mu_j)  }
 	// x = data, mu = model, E^(-1) = inverted covariance matrix 
@@ -86,32 +71,14 @@ void CalcChiSquared(TH1D* h_model, TH1D* h_data, TH2D* cov, double &chi, int &nd
 
 			double diffi = h_data_clone->GetBinContent(i+1) - h_model_clone->GetBinContent(i+1);
 			double diffj = h_data_clone->GetBinContent(j+1) - h_model_clone->GetBinContent(j+1);
-			double LocalChi = diffi * inverse_cov_m[i][j] * diffj * ScaleFactor; 
+			double LocalChi = diffi * inverse_cov_m[i][j] * diffj; 
 			chi += LocalChi;
-//if (i == j) { cout << "i = " << i << " j = " << j << " diffi = " << diffi << " diffj = " << diffj << "  inv = " << inverse_cov_m[i][j] << "  reg m = " << copy_cov_m[i][j] << " chi = " << chi << " LocalChi = " << LocalChi << endl; }
-//cout << "i = " << i << " j = " << j << " diffi = " << diffi << " diffj = " << diffj << "  inv = " << inverse_cov_m[i][j] << "  reg m = " << copy_cov_m[i][j] << " chi = " << chi << " LocalChi = " << LocalChi << endl;
-
 		}
 
 	}
 
-//cout << endl;
-
-//TCanvas* Canvas = new TCanvas("canvas","canvas",205,34,1024,768);
-//copy_cov_m.Draw("coltz text");
-
-//TCanvas* InvCanvas = new TCanvas("invcanvas","invcanvas",205,34,1024,768);
-//inverse_cov_m.Draw("coltz text");
-
-//TCanvas* ProdCanvas = new TCanvas("Prodcanvas","Prodcanvas",205,34,1024,768);
-//TMatrixD product = inverse_cov_m * copy_cov_m;
-//product.Draw("coltz text");
-
 	ndof = h_data_clone->GetNbinsX();
 	pval = TMath::Prob(chi, ndof);
-
-	//std::cout << "Chi2/dof: " << chi << "/" << h_data_clone->GetNbinsX() << " = " << chi/double(ndof) <<  std::endl;
-	//std::cout << "p-value: " <<  pval << "\n" <<  std::endl;
 
 	delete h_model_clone;
 	delete h_data_clone;
