@@ -1,7 +1,7 @@
 #include "TMath.h"
 #include <TH1D.h>
 #include <TH2D.h>
-#include <TMatrix.h>
+#include <TMatrixD.h>
 
 #include <iostream>
 #include <iomanip>
@@ -12,6 +12,88 @@
 
 using namespace std;
 using namespace Constants;
+
+//----------------------------------------//
+
+double FindTwoDimHistoMaxValue(TH2D* h){
+
+	int NXBins = h->GetXaxis()->GetNbins();
+	int NYBins = h->GetYaxis()->GetNbins();	
+	double HistoMax = -9999.;	
+
+	for (int xbin = 1; xbin<= NXBins; xbin++) {
+
+		for (int ybin = 1; ybin<= NYBins; ybin++) {		
+
+			double LocalMax = h->GetBinContent(xbin,ybin);
+			if (LocalMax > HistoMax) { HistoMax = LocalMax; }
+
+		}
+
+	}
+
+	return HistoMax;
+
+}
+
+//----------------------------------------//
+
+double FindTwoDimHistoMinValue(TH2D* h){
+
+	int NXBins = h->GetXaxis()->GetNbins();
+	int NYBins = h->GetYaxis()->GetNbins();	
+	double HistoMin = 999999.;	
+
+	for (int xbin = 1; xbin<= NXBins; xbin++) {
+
+		for (int ybin = 1; ybin<= NYBins; ybin++) {		
+
+			double LocalMin = h->GetBinContent(xbin,ybin);
+			if (LocalMin < HistoMin) { HistoMin = LocalMin; }
+
+		}
+
+	}
+
+	return HistoMin;
+
+}
+
+//----------------------------------------//
+
+double FindOneDimHistoMaxValue(TH1D* h){
+
+	int NBins = h->GetXaxis()->GetNbins();
+	double HistoMax = -9999.;	
+
+	for (int ibin = 1; ibin<= NBins; ibin++) {
+
+		double LocalMax = h->GetBinContent(ibin);
+		if (LocalMax > HistoMax) { HistoMax = LocalMax; }
+
+	}
+
+	return HistoMax;
+
+}
+
+//----------------------------------------//
+
+double FindOneDimHistoMinValue(TH1D* h){
+
+	int NBins = h->GetXaxis()->GetNbins();
+	double HistoMin = 999999.;	
+
+	for (int ibin = 1; ibin<= NBins; ibin++) {
+
+		double LocalMin = h->GetBinContent(ibin);
+		if (LocalMin < HistoMin) { HistoMin = LocalMin; }
+
+	}
+
+	return HistoMin;
+
+}
 
 //----------------------------------------//
 
