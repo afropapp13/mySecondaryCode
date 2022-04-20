@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <string>
 #include <sstream>
+#include <cmath>
 
 #include "ubana/myClasses/Constants.h"
 
@@ -19,19 +20,21 @@ double FindTwoDimHistoMaxValue(TH2D* h){
 
 	int NXBins = h->GetXaxis()->GetNbins();
 	int NYBins = h->GetYaxis()->GetNbins();	
-	double HistoMax = -9999.;	
+	double StartHistoMax = -9999.;
+	double HistoMax = StartHistoMax;	
 
-	for (int xbin = 1; xbin<= NXBins; xbin++) {
+	for (int xbin = 1; xbin <= NXBins; xbin++) {
 
-		for (int ybin = 1; ybin<= NYBins; ybin++) {		
+		for (int ybin = 1; ybin <= NYBins; ybin++) {		
 
 			double LocalMax = h->GetBinContent(xbin,ybin);
-			if (LocalMax > HistoMax) { HistoMax = LocalMax; }
+			if (LocalMax > HistoMax && !isinf(LocalMax) ) { HistoMax = LocalMax; }
 
 		}
 
 	}
 
+	if (HistoMax == StartHistoMax) { cout << "HistoMax = " << HistoMax << endl; }
 	return HistoMax;
 
 }
@@ -42,7 +45,8 @@ double FindTwoDimHistoMinValue(TH2D* h){
 
 	int NXBins = h->GetXaxis()->GetNbins();
 	int NYBins = h->GetYaxis()->GetNbins();	
-	double HistoMin = 999999.;	
+	double StartHistoMin = 999999.;
+	double HistoMin = StartHistoMin;	
 
 	for (int xbin = 1; xbin<= NXBins; xbin++) {
 
@@ -55,6 +59,7 @@ double FindTwoDimHistoMinValue(TH2D* h){
 
 	}
 
+	if (HistoMin == StartHistoMin) { cout << "HistoMin = " << HistoMin << endl; }
 	return HistoMin;
 
 }
