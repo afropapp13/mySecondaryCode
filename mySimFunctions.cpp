@@ -16,6 +16,23 @@ using namespace std;
 
 //----------------------------------------//
 
+TString PrintMultipleTimes(int times, TString string) {
+
+	TString MergeTStrings = "";
+
+    for (int itime = 0; itime < times; itime++) {
+
+		MergeTStrings += string;
+
+	} 
+
+	return MergeTStrings;
+ 
+}
+
+
+//----------------------------------------//
+
 double round(double var,int acc = 0) {
 
     double value = (int)(var * TMath::Power(10.,acc) + .5); 
